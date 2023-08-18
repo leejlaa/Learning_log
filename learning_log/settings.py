@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 import django_heroku
 
@@ -24,7 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o!mtnq+3slkifi)8c3$z*($j@v#f=2x)f#hnw$p90ep!i6s8%+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if os.environ.get('DEBUG') == 'TRUE':
+    DEBUG = True
+elif os.environ.get('DEBUG') == 'FALSE':
+    DEBUG = False
+
 
 ALLOWED_HOSTS = []
 
@@ -35,9 +39,9 @@ INSTALLED_APPS = [
     # My apps
     'learning_logs',
     'users',
+    'django.contrib.admin',
     # Third party apps
     'bootstrap4',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -57,10 +61,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'learning_log.urls'
 
+
+TEMPLATES_DIRS = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIRS],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,3 +140,7 @@ LOGIN_URL = 'users:login'
 
 # Heroku settings
 django_heroku.settings(locals())
+# ie if Heroku server
+if 'DATABASE_URL' in os.environ:
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config()}
